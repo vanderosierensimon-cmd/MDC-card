@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Hexagone fond navy -->
+  <polygon points="32,2 59,17 59,47 32,62 5,47 5,17" fill="#1C2E4A"/>
+
+  <!-- Toit de maison (blanc) -->
+  <polygon points="32,13 47,27 17,27" fill="white"/>
+  <!-- Cheminée -->
+  <rect x="38" y="15" width="5" height="9" fill="white"/>
+  <!-- Corps de la maison -->
+  <rect x="21" y="27" width="22" height="11" fill="white"/>
+
+  <!-- Vague (canal) - dorée -->
+  <path d="M10,46 Q17,41 24,46 Q31,51 38,46 Q45,41 54,46"
+        fill="none" stroke="#C6A15B" stroke-width="3" stroke-linecap="round"/>
+</svg>
