@@ -6,7 +6,7 @@
   <title>Menu - La Maison du Canal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Caveat:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --navy: #3D556F;
@@ -355,27 +355,96 @@
       margin-top: 6px;
     }
 
-    /* ===== SUGGESTIONS BOX ===== */
-    .suggestions-box {
-      background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
-      border-radius: 10px;
-      padding: 20px 16px;
-      text-align: center;
+    /* ===== TABLEAU NOIR — SUGGESTIONS ===== */
+    .tableau-noir {
+      background: #1C1C1C;
+      border-radius: 12px;
+      padding: 20px 18px 16px;
       margin-top: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
     }
 
-    .suggestions-box .suggestions-title {
-      color: white;
-      font-size: 16px;
-      font-weight: 800;
+    .tableau-noir-title {
+      font-family: 'Caveat', cursive;
+      color: #ffffff;
+      font-size: 26px;
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      text-shadow: 0 0 10px rgba(255,255,255,0.15);
+    }
+
+    .tableau-noir-divider {
+      border: none;
+      border-top: 1px dashed rgba(255,255,255,0.25);
+      margin: 0 0 12px;
+    }
+
+    .tableau-noir-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px dashed rgba(255,255,255,0.12);
+    }
+
+    .tableau-noir-item:last-child {
+      border-bottom: none;
+    }
+
+    .tableau-noir-item-left {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .tableau-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 2px;
+      letter-spacing: 0.5px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-bottom: 4px;
+    }
+    .tableau-badge.entree  { background: rgba(74,153,74,0.35); color: #a8e6a8; }
+    .tableau-badge.plat    { background: rgba(255,255,255,0.15); color: #e8e8e8; }
+    .tableau-badge.dessert { background: rgba(200,100,130,0.35); color: #f4b8c8; }
+
+    .tableau-noir-name {
+      font-family: 'Caveat', cursive;
+      font-size: 22px;
+      font-weight: 600;
+      color: #ffffff;
+      line-height: 1.2;
+      display: block;
     }
 
-    .suggestions-box .suggestions-text {
-      color: rgba(255,255,255,0.9);
-      font-size: 13px;
-      margin-top: 6px;
+    .tableau-noir-desc {
+      font-family: 'Caveat', cursive;
+      font-size: 16px;
+      color: rgba(255,255,255,0.6);
+      margin-top: 2px;
+      display: block;
+    }
+
+    .tableau-noir-price {
+      font-family: 'Caveat', cursive;
+      font-size: 22px;
+      font-weight: 700;
+      color: #ffffff;
+      white-space: nowrap;
+      padding-top: 18px;
+    }
+
+    .tableau-noir-empty {
+      font-family: 'Caveat', cursive;
+      color: rgba(255,255,255,0.45);
+      font-size: 18px;
+      text-align: center;
+      padding: 8px 0 4px;
     }
 
     /* ===== FOOTER ===== */
@@ -663,9 +732,12 @@
       <div class="item"><div class="item-left"><span class="item-name">Menu complet</span><p class="item-desc">Au choix : Jambon &bull; Nuggets &bull; Filet américain &bull; Steak haché</p><p class="item-desc">Servi avec frites et crudités &bull; Une boule de glace au choix</p></div><span class="item-price">9,90 €</span></div>
     </div>
 
-    <div class="suggestions-box">
-      <p class="suggestions-title">Suggestions du jour</p>
-      <p class="suggestions-text">Consultez notre tableau pour découvrir les plats du moment</p>
+    <div class="tableau-noir" id="tableau-noir">
+      <div class="tableau-noir-title">Suggestions du jour</div>
+      <hr class="tableau-noir-divider">
+      <div id="tableau-noir-content">
+        <p class="tableau-noir-empty">Chargement…</p>
+      </div>
     </div>
   </section>
 
@@ -785,6 +857,44 @@
       btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+
+    /* ===== TABLEAU NOIR — SUGGESTIONS DU JOUR ===== */
+    var API_URL = 'https://mdc-menu.vercel.app/api/suggestions';
+    var typeLabels = { entree: 'Entrée', plat: 'Plat', dessert: 'Dessert' };
+
+    function renderTableauNoir(suggestions) {
+      var content = document.getElementById('tableau-noir-content');
+      var actives = suggestions.filter(function(s) { return s.actif; });
+
+      if (actives.length === 0) {
+        document.getElementById('tableau-noir').style.display = 'none';
+        return;
+      }
+
+      content.innerHTML = actives.map(function(s) {
+        var prix = parseFloat(s.prix).toFixed(2).replace('.', ',') + ' €';
+        var desc = s.description
+          ? '<span class="tableau-noir-desc">' + s.description + '</span>'
+          : '';
+        return [
+          '<div class="tableau-noir-item">',
+          '  <div class="tableau-noir-item-left">',
+          '    <span class="tableau-badge ' + s.type + '">' + (typeLabels[s.type] || s.type) + '</span>',
+          '    <span class="tableau-noir-name">' + s.nom + '</span>',
+          desc,
+          '  </div>',
+          '  <span class="tableau-noir-price">' + prix + '</span>',
+          '</div>'
+        ].join('');
+      }).join('');
+    }
+
+    // Données d'exemple — à remplacer par fetch(API_URL) une fois l'API déployée
+    renderTableauNoir([
+      { actif: true, type: 'entree', nom: 'Tartare de saumon', description: 'Avocat, citron vert, coriandre', prix: 13.50 },
+      { actif: true, type: 'plat',   nom: 'Joue de bœuf braisée', description: 'Purée maison, jus de cuisson réduit', prix: 24.00 },
+      { actif: true, type: 'dessert',nom: 'Moelleux au chocolat', description: 'Cœur coulant, glace vanille', prix: 8.50 }
+    ]);
   </script>
 
 </body>
