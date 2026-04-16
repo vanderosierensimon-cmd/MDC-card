@@ -18,12 +18,25 @@
       overflow: hidden;
     }
 
+    /* Logo en filigrane */
+    .bg-logo {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 28vw;
+      opacity: 0.04;
+      pointer-events: none;
+      z-index: 0;
+    }
+
     .page {
+      position: relative;
+      z-index: 1;
       width: 100vw; height: 100vh;
       display: flex;
       flex-direction: column;
-      padding: 5vh 8vw;
-      gap: 3vh;
+      padding: 4vh 8vw;
+      gap: 2.5vh;
     }
 
     /* ===== HEADER ===== */
@@ -33,7 +46,7 @@
     }
 
     .header h1 {
-      font-size: clamp(2.5rem, 6vw, 5rem);
+      font-size: clamp(2.2rem, 5.5vw, 4.5rem);
       font-weight: 700;
       letter-spacing: 2px;
       text-shadow: 0 0 20px rgba(255,255,255,0.12);
@@ -42,16 +55,24 @@
     .header-divider {
       border: none;
       border-top: 2px dashed rgba(255,255,255,0.25);
-      margin: 1.5vh auto 0;
+      margin: 1.2vh auto 0;
       width: 50%;
     }
 
     /* ===== GRID ===== */
+    #content {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
     .grid {
       flex: 1;
+      min-height: 0;
       display: grid;
-      gap: 2vw;
-      align-content: center;
+      gap: 1.5vh 2.5vw;
+      grid-auto-rows: 1fr;
     }
 
     .grid.cols-1 { grid-template-columns: 1fr; }
@@ -61,43 +82,68 @@
     .card {
       background: rgba(255,255,255,0.06);
       border-radius: 16px;
-      padding: clamp(1rem, 2.5vw, 2.5rem);
+      padding: 1.5vh 2vw;
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.6vh;
+      overflow: hidden;
     }
 
     .badge {
       display: inline-block;
-      font-size: clamp(0.7rem, 1.2vw, 1rem);
+      font-size: clamp(0.6rem, 0.9vw, 0.85rem);
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 1px;
-      padding: 3px 14px;
+      padding: 2px 12px;
       border-radius: 20px;
       align-self: flex-start;
+      flex-shrink: 0;
     }
-    .badge.entree  { background: rgba(74,153,74,0.35); color: #a8e6a8; }
-    .badge.plat    { background: rgba(255,255,255,0.15); color: #e8e8e8; }
-    .badge.dessert { background: rgba(200,100,130,0.35); color: #f4b8c8; }
+    .badge.entree  { background: rgba(74,153,74,0.35);    color: #a8e6a8; }
+    .badge.plat    { background: rgba(255,255,255,0.15);  color: #e8e8e8; }
+    .badge.dessert { background: rgba(200,100,130,0.35);  color: #f4b8c8; }
+
+    /* Nom + prix sur la même ligne */
+    .card-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 1.5vw;
+    }
 
     .card-name {
-      font-size: clamp(2rem, 4.5vw, 3.8rem);
+      font-size: clamp(1.6rem, 3vw, 2.8rem);
       font-weight: 600;
       line-height: 1.1;
-    }
-
-    .card-desc {
-      font-size: clamp(1.2rem, 2.5vw, 2.2rem);
-      color: rgba(255,255,255,0.55);
+      flex: 1;
+      min-width: 0;
     }
 
     .card-price {
-      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-size: clamp(1.6rem, 2.8vw, 2.6rem);
       font-weight: 700;
       color: #C6A15B;
-      text-align: right;
-      margin-top: auto;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .card-desc {
+      font-size: clamp(1rem, 1.6vw, 1.6rem);
+      color: rgba(255,255,255,0.5);
+      line-height: 1.2;
+    }
+
+    .card.rupture .card-name,
+    .card.rupture .card-price {
+      text-decoration: line-through;
+      opacity: 0.5;
+    }
+
+    .card-rupture-badge {
+      font-size: clamp(0.7rem, 1vw, 1rem);
+      color: #e88080;
+      margin-top: 0.3vh;
     }
 
     /* ===== EMPTY ===== */
@@ -117,13 +163,17 @@
     /* ===== FOOTER ===== */
     .footer {
       text-align: center;
-      font-size: clamp(1rem, 1.8vw, 1.6rem);
-      color: rgba(255,255,255,0.25);
+      font-size: clamp(0.9rem, 1.5vw, 1.4rem);
+      color: rgba(255,255,255,0.2);
       flex-shrink: 0;
     }
   </style>
 </head>
 <body>
+
+  <!-- Logo filigrane -->
+  <img class="bg-logo" src="../assets/logo-blanc.png" alt="">
+
   <div class="page">
     <div class="header">
       <h1>Suggestions du jour</h1>
@@ -136,11 +186,17 @@
   </div>
 
   <script>
-    var API_URL = 'https://mdc-menu.vercel.app/api/suggestions';
+    var SUPABASE_URL = 'https://aqcqfovvyliizfiavhur.supabase.co';
+    var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxY3Fmb3Z2eWxpaXpmaWF2aHVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3NjI4OTEsImV4cCI6MjA4NTMzODg5MX0.EMauvyJ5lXJmSWjFFMVQwv0LaTSI3A78sHU2DZIdn54';
     var typeLabels = { entree: 'Entrée', plat: 'Plat', dessert: 'Dessert' };
 
+    var typeOrder = { entree: 0, plat: 1, dessert: 2 };
+
     function render(suggestions) {
-      var actives = suggestions.filter(function(s) { return s.actif; }).slice(0, 6);
+      var actives = suggestions
+        .filter(function(s) { return s.actif; })
+        .sort(function(a, b) { return (typeOrder[a.type] ?? 9) - (typeOrder[b.type] ?? 9); })
+        .slice(0, 6);
       var content = document.getElementById('content');
 
       if (actives.length === 0) {
@@ -154,12 +210,19 @@
         var desc = s.description
           ? '<span class="card-desc">' + s.description + '</span>'
           : '';
+        var ruptureBadge = s.en_rupture
+          ? '<span class="card-rupture-badge">Rupture de stock</span>'
+          : '';
+        var ruptureClass = s.en_rupture ? ' rupture' : '';
         return [
-          '<div class="card">',
+          '<div class="card' + ruptureClass + '">',
           '  <span class="badge ' + s.type + '">' + (typeLabels[s.type] || s.type) + '</span>',
-          '  <span class="card-name">' + s.nom + '</span>',
+          '  <div class="card-row">',
+          '    <span class="card-name">' + s.nom + '</span>',
+          '    <span class="card-price">' + prix + '</span>',
+          '  </div>',
           desc,
-          '  <span class="card-price">' + prix + '</span>',
+          ruptureBadge,
           '</div>'
         ].join('');
       }).join('');
@@ -167,13 +230,21 @@
       content.innerHTML = '<div class="grid ' + cols + '">' + cards + '</div>';
     }
 
-    fetch(API_URL)
+    // Fetch depuis Supabase — rafraîchissement toutes les 60 secondes
+    function loadAndRender() {
+      fetch(SUPABASE_URL + '/rest/v1/suggestions?select=*&order=type', {
+        headers: {
+          'apikey': SUPABASE_ANON,
+          'Authorization': 'Bearer ' + SUPABASE_ANON
+        }
+      })
       .then(function(r) { return r.json(); })
-      .then(render)
-      .catch(function() {
-        document.getElementById('content').innerHTML =
-          '<div class="empty"><p>Demandez à votre serveur</p></div>';
-      });
+      .then(function(data) { render(data); })
+      .catch(function() { render([]); });
+    }
+
+    loadAndRender();
+    setInterval(loadAndRender, 60000);
   </script>
 </body>
 </html>

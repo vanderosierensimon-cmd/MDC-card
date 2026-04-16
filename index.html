@@ -439,6 +439,20 @@
       padding-top: 18px;
     }
 
+    .tableau-noir-rupture .tableau-noir-name,
+    .tableau-noir-rupture .tableau-noir-price {
+      text-decoration: line-through;
+      opacity: 0.5;
+    }
+
+    .tableau-noir-rupture-badge {
+      font-family: 'Caveat', cursive;
+      font-size: 13px;
+      color: #e88080;
+      margin-top: 2px;
+      display: block;
+    }
+
     .tableau-noir-empty {
       font-family: 'Caveat', cursive;
       color: rgba(255,255,255,0.45);
@@ -859,12 +873,16 @@
     }
 
     /* ===== TABLEAU NOIR — SUGGESTIONS DU JOUR ===== */
-    var API_URL = 'https://mdc-menu.vercel.app/api/suggestions';
+    var SUPABASE_URL = 'https://aqcqfovvyliizfiavhur.supabase.co';
+    var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxY3Fmb3Z2eWxpaXpmaWF2aHVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3NjI4OTEsImV4cCI6MjA4NTMzODg5MX0.EMauvyJ5lXJmSWjFFMVQwv0LaTSI3A78sHU2DZIdn54';
     var typeLabels = { entree: 'Entrée', plat: 'Plat', dessert: 'Dessert' };
+    var typeOrder  = { entree: 0, plat: 1, dessert: 2 };
 
     function renderTableauNoir(suggestions) {
       var content = document.getElementById('tableau-noir-content');
-      var actives = suggestions.filter(function(s) { return s.actif; });
+      var actives = suggestions
+        .filter(function(s) { return s.actif; })
+        .sort(function(a, b) { return (typeOrder[a.type] || 0) - (typeOrder[b.type] || 0); });
 
       if (actives.length === 0) {
         document.getElementById('tableau-noir').style.display = 'none';
@@ -876,12 +894,17 @@
         var desc = s.description
           ? '<span class="tableau-noir-desc">' + s.description + '</span>'
           : '';
+        var ruptureBadge = s.en_rupture
+          ? '<span class="tableau-noir-rupture-badge">Rupture de stock</span>'
+          : '';
+        var ruptureClass = s.en_rupture ? ' tableau-noir-rupture' : '';
         return [
-          '<div class="tableau-noir-item">',
+          '<div class="tableau-noir-item' + ruptureClass + '">',
           '  <div class="tableau-noir-item-left">',
           '    <span class="tableau-badge ' + s.type + '">' + (typeLabels[s.type] || s.type) + '</span>',
           '    <span class="tableau-noir-name">' + s.nom + '</span>',
           desc,
+          ruptureBadge,
           '  </div>',
           '  <span class="tableau-noir-price">' + prix + '</span>',
           '</div>'
@@ -889,12 +912,18 @@
       }).join('');
     }
 
-    // Données d'exemple — à remplacer par fetch(API_URL) une fois l'API déployée
-    renderTableauNoir([
-      { actif: true, type: 'entree', nom: 'Tartare de saumon', description: 'Avocat, citron vert, coriandre', prix: 13.50 },
-      { actif: true, type: 'plat',   nom: 'Joue de bœuf braisée', description: 'Purée maison, jus de cuisson réduit', prix: 24.00 },
-      { actif: true, type: 'dessert',nom: 'Moelleux au chocolat', description: 'Cœur coulant, glace vanille', prix: 8.50 }
-    ]);
+    // Fetch depuis Supabase (lecture publique via RLS anon)
+    fetch(SUPABASE_URL + '/rest/v1/suggestions?select=*&order=type', {
+      headers: {
+        'apikey': SUPABASE_ANON,
+        'Authorization': 'Bearer ' + SUPABASE_ANON
+      }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) { renderTableauNoir(data); })
+    .catch(function() {
+      document.getElementById('tableau-noir').style.display = 'none';
+    });
   </script>
 
 </body>
