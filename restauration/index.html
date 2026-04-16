@@ -195,7 +195,10 @@
     function render(suggestions) {
       var actives = suggestions
         .filter(function(s) { return s.actif; })
-        .sort(function(a, b) { return (typeOrder[a.type] ?? 9) - (typeOrder[b.type] ?? 9); })
+        .sort(function(a, b) {
+          var td = (typeOrder[a.type] ?? 9) - (typeOrder[b.type] ?? 9);
+          return td !== 0 ? td : parseFloat(a.prix) - parseFloat(b.prix);
+        })
         .slice(0, 6);
       var content = document.getElementById('content');
 

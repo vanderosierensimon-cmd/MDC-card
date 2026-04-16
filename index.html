@@ -882,7 +882,10 @@
       var content = document.getElementById('tableau-noir-content');
       var actives = suggestions
         .filter(function(s) { return s.actif; })
-        .sort(function(a, b) { return (typeOrder[a.type] || 0) - (typeOrder[b.type] || 0); });
+        .sort(function(a, b) {
+          var td = (typeOrder[a.type] || 0) - (typeOrder[b.type] || 0);
+          return td !== 0 ? td : parseFloat(a.prix) - parseFloat(b.prix);
+        });
 
       if (actives.length === 0) {
         document.getElementById('tableau-noir').style.display = 'none';
