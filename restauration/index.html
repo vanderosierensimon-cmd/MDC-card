@@ -167,12 +167,34 @@
       color: rgba(255,255,255,0.2);
       flex-shrink: 0;
     }
+
+    /* ===== BOUTON PLEIN ÉCRAN ===== */
+    #btn-fullscreen {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      z-index: 100;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      border-radius: 8px;
+      color: rgba(255,255,255,0.4);
+      cursor: pointer;
+      padding: 8px 10px;
+      font-size: 20px;
+      line-height: 1;
+      transition: opacity 0.2s;
+    }
+    #btn-fullscreen:hover { background: rgba(255,255,255,0.2); color: #fff; }
+    #btn-fullscreen.hidden { opacity: 0; pointer-events: none; }
   </style>
 </head>
 <body>
 
   <!-- Logo filigrane -->
   <img class="bg-logo" src="../assets/logo-blanc.png" alt="">
+
+  <!-- Bouton plein écran -->
+  <button id="btn-fullscreen" title="Plein écran">⛶</button>
 
   <div class="page">
     <div class="header">
@@ -248,6 +270,33 @@
 
     loadAndRender();
     setInterval(loadAndRender, 60000);
+
+    // ===== PLEIN ÉCRAN =====
+    var btn = document.getElementById('btn-fullscreen');
+
+    function updateBtn() {
+      var fs = document.fullscreenElement || document.webkitFullscreenElement;
+      btn.textContent = fs ? '✕' : '⛶';
+      btn.classList.toggle('hidden', !!fs);
+    }
+
+    btn.addEventListener('click', function() {
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen).call(document.documentElement);
+      } else {
+        (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      }
+    });
+
+    document.addEventListener('fullscreenchange', updateBtn);
+    document.addEventListener('webkitfullscreenchange', updateBtn);
+
+    // Quitter le plein écran avec Échap (déjà natif) ou double-clic
+    document.addEventListener('dblclick', function() {
+      if (document.fullscreenElement || document.webkitFullscreenElement) {
+        (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      }
+    });
   </script>
 </body>
 </html>
