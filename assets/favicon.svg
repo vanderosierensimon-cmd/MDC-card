@@ -1,15 +1,50 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- Hexagone fond navy -->
-  <polygon points="32,2 59,17 59,47 32,62 5,47 5,17" fill="#1C2E4A"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220">
+  <rect width="200" height="220" fill="white"/>
 
-  <!-- Toit de maison (blanc) -->
-  <polygon points="32,13 47,27 17,27" fill="white"/>
-  <!-- Cheminée -->
-  <rect x="38" y="15" width="5" height="9" fill="white"/>
-  <!-- Corps de la maison -->
-  <rect x="21" y="27" width="22" height="11" fill="white"/>
+  <!-- Hexagone avec toit de maison (sens des aiguilles, peak en haut) -->
+  <!-- Peak légèrement à gauche du centre comme sur le logo -->
+  <!-- Cheminée sur la pente droite du toit -->
+  <path d="
+    M 88 8
+    L 109 22
+    L 109 10
+    L 118 10
+    L 118 27
+    L 158 56
+    L 178 120
+    L 158 184
+    L 100 214
+    L 42 184
+    L 22 120
+    L 42 56
+    Z
+  " fill="none" stroke="#1C2E4A" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>
 
-  <!-- Vague (canal) - dorée -->
-  <path d="M10,46 Q17,41 24,46 Q31,51 38,46 Q45,41 54,46"
-        fill="none" stroke="#C6A15B" stroke-width="3" stroke-linecap="round"/>
+  <!-- Ligne ondulée (canal) -->
+  <path d="M 42 126 Q 60 114 78 126 Q 96 138 114 126 Q 132 114 150 126 Q 157 130 160 128"
+        fill="none" stroke="#1C2E4A" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- "La" petit italique -->
+  <text x="85" y="88"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-size="13" font-style="italic"
+        fill="#1C2E4A">La</text>
+
+  <!-- "MAISON" -->
+  <text x="100" y="110" text-anchor="middle"
+        font-family="'Arial Narrow', Arial, 'Helvetica Neue', sans-serif"
+        font-size="21" font-weight="700" letter-spacing="4"
+        fill="#1C2E4A">MAISON</text>
+
+  <!-- "du" petit italique -->
+  <text x="82" y="150"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-size="11" font-style="italic"
+        fill="#1C2E4A">du</text>
+
+  <!-- "CANAL" -->
+  <text x="100" y="171" text-anchor="middle"
+        font-family="'Arial Narrow', Arial, 'Helvetica Neue', sans-serif"
+        font-size="21" font-weight="700" letter-spacing="5"
+        fill="#1C2E4A">CANAL</text>
 </svg>
