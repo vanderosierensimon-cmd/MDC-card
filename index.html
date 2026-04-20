@@ -108,14 +108,16 @@
 
     /* ===== SECTIONS ===== */
     .section-page {
-      display: none;
+      display: block;
       padding: 16px 16px 40px;
       max-width: 640px;
       margin: 0 auto;
     }
 
-    .section-page.active {
-      display: block;
+    /* Séparateur visuel entre sections */
+    .section-page + .section-page {
+      border-top: 3px solid var(--navy);
+      padding-top: 24px;
     }
 
     .page-title {
@@ -498,13 +500,13 @@
 
     <!-- NAV TABS -->
     <nav class="nav-tabs" id="navTabs">
-    <button class="active" onclick="showTab('boissons', this)">Boissons</button>
-    <button onclick="showTab('bieres', this)">Bières</button>
-    <button onclick="showTab('vins', this)">Vins</button>
-    <button onclick="showTab('restauration', this)">Restauration</button>
-    <button onclick="showTab('planches', this)">Planches & Tapas</button>
-    <button onclick="showTab('desserts', this)">Desserts</button>
-    <button onclick="showTab('chauds', this)">Boissons Chaudes</button>
+    <button class="active" data-section="boissons" onclick="scrollToSection('boissons', this)">Boissons</button>
+    <button data-section="bieres" onclick="scrollToSection('bieres', this)">Bières</button>
+    <button data-section="vins" onclick="scrollToSection('vins', this)">Vins</button>
+    <button data-section="restauration" onclick="scrollToSection('restauration', this)">Restauration</button>
+    <button data-section="planches" onclick="scrollToSection('planches', this)">Planches & Tapas</button>
+    <button data-section="desserts" onclick="scrollToSection('desserts', this)">Desserts</button>
+    <button data-section="chauds" onclick="scrollToSection('chauds', this)">Boissons Chaudes</button>
     </nav>
   </div><!-- /sticky-top -->
 
@@ -861,18 +863,53 @@
   </section>
 
   <script>
-    function showTab(id, btn) {
-      document.querySelectorAll('.section-page').forEach(function(s) {
-        s.classList.remove('active');
-      });
+    /* ===== SCROLL INFINI ===== */
+    var _scrollingToSection = false;
+
+    function scrollToSection(id, btn) {
+      var el = document.getElementById('tab-' + id);
+      if (!el) return;
+      var stickyH = document.querySelector('.sticky-top').offsetHeight;
+      var top = el.getBoundingClientRect().top + window.pageYOffset - stickyH - 8;
+      _scrollingToSection = true;
+      setActiveTab(id);
+      window.scrollTo({ top: top, behavior: 'smooth' });
+      // Réactive l'observer après la fin du scroll animé
+      setTimeout(function() { _scrollingToSection = false; }, 800);
+    }
+
+    function setActiveTab(id) {
       document.querySelectorAll('.nav-tabs button').forEach(function(b) {
         b.classList.remove('active');
       });
-      document.getElementById('tab-' + id).classList.add('active');
-      btn.classList.add('active');
-      btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      var btn = document.querySelector('.nav-tabs button[data-section="' + id + '"]');
+      if (btn) {
+        btn.classList.add('active');
+        btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
     }
+
+    // IntersectionObserver : met à jour l'onglet actif pendant le scroll
+    document.addEventListener('DOMContentLoaded', function() {
+      var sections = document.querySelectorAll('.section-page');
+      var observer = new IntersectionObserver(function(entries) {
+        if (_scrollingToSection) return;
+        var visible = [];
+        entries.forEach(function(e) { if (e.isIntersecting) visible.push(e); });
+        if (visible.length === 0) return;
+        // Prendre la section la plus haute visible
+        visible.sort(function(a, b) {
+          return a.boundingClientRect.top - b.boundingClientRect.top;
+        });
+        var topEntry = visible[0];
+        var id = topEntry.target.id.replace('tab-', '');
+        setActiveTab(id);
+      }, {
+        rootMargin: '-20% 0px -70% 0px',
+        threshold: 0
+      });
+      sections.forEach(function(s) { observer.observe(s); });
+    });
 
     /* ===== TABLEAU NOIR — SUGGESTIONS DU JOUR ===== */
     var SUPABASE_URL = 'https://aqcqfovvyliizfiavhur.supabase.co';
